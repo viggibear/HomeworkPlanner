@@ -1,0 +1,54 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/toolbar_actionbar"
+        layout="@layout/toolbar_default"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/toolbar_actionbar">
+
+        <FrameLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:clickable="true"
+            android:layout_height="match_parent">
+
+            <com.melnykov.fab.FloatingActionButton
+                android:id="@+id/view_add_fab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|bottom"
+                android:layout_margin="16dp"
+                android:src="@drawable/ic_add_white_18dp"
+                fab:fab_colorNormal="@color/myPrimaryColor"
+                fab:fab_colorPressed="@color/myPrimaryDarkColor"
+                fab:fab_colorRipple="@color/myTextPrimaryColor" />
+
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/view_homework_recyclerview">
+            </android.support.v7.widget.RecyclerView>
+        </FrameLayout>
+
+        <!-- android:layout_marginTop="?android:attr/actionBarSize"-->
+        <fragment class="com.viggi.homeworkplanner.NavigationDrawerFragment"
+            android:id="@+id/fragment_drawer"
+            android:layout_width="@dimen/navigation_drawer_width"
+            android:layout_height="match_parent"
+            android:layout_gravity="start" />
+
+    </android.support.v4.widget.DrawerLayout>
+
+</RelativeLayout>
