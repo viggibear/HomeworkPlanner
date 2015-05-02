@@ -5,13 +5,13 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     card_view:cardCornerRadius="4dp"
-
     card_view:cardUseCompatPadding="true">
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="116dp"
-        android:layout_margin="5dp">
+        android:layout_margin="5dp"
+        android:layout_marginLeft="8dp">
 
         <TextView
             android:id="@+id/cardview_hwname_textview"

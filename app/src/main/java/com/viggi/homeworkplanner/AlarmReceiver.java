@@ -22,7 +22,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setSmallIcon(R.drawable.ic_homework)
                         .setContentTitle(mHomeworkName)
                         .setContentText("Due: " + mDueDateString)
                         .setStyle(new NotificationCompat.BigTextStyle()
