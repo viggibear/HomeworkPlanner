@@ -1,7 +1,10 @@
 package com.viggi.homeworkplanner;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -12,6 +15,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.github.johnpersano.supertoasts.SuperActivityToast;
+import com.github.johnpersano.supertoasts.SuperToast;
+import com.github.johnpersano.supertoasts.util.OnClickWrapper;
 import com.melnykov.fab.FloatingActionButton;
 
 import java.util.List;
@@ -51,7 +57,7 @@ public class ViewHomeworkActivity extends ActionBarActivity
             }
         });
 
-        mRecyclerView = (RecyclerView)findViewById(R.id.view_homework_recyclerview);
+        mRecyclerView = (RecyclerView) findViewById(R.id.view_homework_recyclerview);
         mAddHwButton.attachToRecyclerView(mRecyclerView);
         mRecyclerView.setHasFixedSize(false);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -59,29 +65,28 @@ public class ViewHomeworkActivity extends ActionBarActivity
 
         List<Homework> homeworkList = getHomeworkList(pickString);
         setmRecyclerView(homeworkList);
+        setListeners(mRecyclerView);
 
     }
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
-        if(position==0){
+        if (position == 0) {
             pickString = "Due";
             setTitle("Due");
-        }
-        else if(position==1){
+        } else if (position == 1) {
             pickString = "Done";
             setTitle("Done");
-        }
-        else if(position==2){
+        } else if (position == 2) {
             pickString = "Archived";
             setTitle("Archived");
 
         }
-        try{
+        try {
             List<Homework> homeworkList = getHomeworkList(pickString);
             setmRecyclerView(homeworkList);
-        } catch (NullPointerException e){
+        } catch (NullPointerException e) {
             return;
         }
 
@@ -125,34 +130,138 @@ public class ViewHomeworkActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void setmRecyclerView(List<Homework> homeworkList){
+    private void setmRecyclerView(List<Homework> homeworkList) {
         mAdapter = new HomeworkViewAdapter(homeworkList, ViewHomeworkActivity.this);
         mRecyclerView.setAdapter(mAdapter);
     }
 
-    public List<Homework> getHomeworkList(String pickString){
+    public List<Homework> getHomeworkList(String pickString) {
         List<Homework> homeworkList = Homework.listAll(Homework.class);
-        if(pickString.equals("Due")){
-            for (Homework homework:homeworkList){
-                if(homework.getmDone()==1 && homework.getmArchived()==0){
+        if (pickString.equals("Due")) {
+            for (Homework homework : homeworkList) {
+                if (homework.getmDone() == 1 || homework.getmArchived() == 1) {
                     homeworkList.remove(homework);
                 }
             }
-        }
-        else if(pickString.equals("Done")){
-            for (Homework homework:homeworkList){
-                if(homework.getmDone()==0 && homework.getmArchived()==0){
+        } else if (pickString.equals("Done")) {
+            for (Homework homework : homeworkList) {
+                if (homework.getmDone() == 0 || homework.getmArchived() == 1) {
                     homeworkList.remove(homework);
                 }
             }
-        }
-        else if(pickString.equals("Archived")){
-            for (Homework homework:homeworkList){
-                if(homework.getmArchived()==0){
+        } else if (pickString.equals("Archived")) {
+            for (Homework homework : homeworkList) {
+                if (homework.getmArchived() == 0) {
                     homeworkList.remove(homework);
                 }
             }
         }
         return homeworkList;
+    }
+
+    public void setListeners(RecyclerView mRecyclerView) {
+        mRecyclerView.addOnItemTouchListener(
+                new RecyclerItemSingleClickListener(this, new RecyclerItemSingleClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+
+                    }
+                }
+        ));
+
+        SwipeableRecyclerViewTouchListener swipeTouchListener =
+                new SwipeableRecyclerViewTouchListener(mRecyclerView,
+                        new SwipeableRecyclerViewTouchListener.SwipeListener() {
+                            @Override
+                            public boolean canSwipe(int position) {
+                                return true;
+                            }
+
+                            @Override
+                            public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                                for (final int position : reverseSortedPositions) {
+                                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            switch (which) {
+                                                case DialogInterface.BUTTON_POSITIVE:
+                                                    List<Homework> homeworkList = getHomeworkList(pickString);
+                                                    Homework homework = homeworkList.get(position);
+                                                    homeworkList.remove(homework);
+                                                    homework.delete();
+                                                    setmRecyclerView(getHomeworkList(pickString));
+                                                    break;
+
+                                                case DialogInterface.BUTTON_NEGATIVE:
+                                                    dialog.cancel();
+                                                    break;
+                                            }
+                                        }
+                                    };
+
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(ViewHomeworkActivity.this);
+                                    builder.setMessage("Are you sure you want to delete this?").setPositiveButton("Yes", dialogClickListener)
+                                            .setNegativeButton("No", dialogClickListener).show();
+
+                                }
+
+
+                            }
+
+                            @Override
+                            public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
+                                for (int position : reverseSortedPositions) {
+                                    final List<Homework> homeworkList = getHomeworkList(pickString);
+                                    final Homework homework = homeworkList.get(position);
+                                    if (homework.getmArchived() == 0) {
+                                        homework.setmArchived(1);
+                                        homework.save();
+                                        homeworkList.remove(position);
+                                        setmRecyclerView(homeworkList);
+                                        SuperActivityToast superActivityToast = new SuperActivityToast(ViewHomeworkActivity.this, SuperToast.Type.BUTTON);
+                                        superActivityToast.setDuration(SuperToast.Duration.EXTRA_LONG);
+                                        superActivityToast.setText("Homework Archived");
+                                        superActivityToast.setButtonIcon(SuperToast.Icon.Dark.UNDO, "UNDO");
+                                        OnClickWrapper onClickWrapper = new OnClickWrapper("superactivitytoast", new SuperToast.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view, Parcelable token) {
+                                                homework.setmArchived(0);
+                                                homework.save();
+                                                List<Homework> homeworkList = getHomeworkList(pickString);
+                                                setmRecyclerView(homeworkList);
+                                            }
+
+                                        });
+                                        superActivityToast.setOnClickWrapper(onClickWrapper);
+                                        superActivityToast.show();
+                                    } else if (homework.getmArchived() == 1) {
+                                        homework.setmArchived(0);
+                                        homework.save();
+                                        homeworkList.remove(position);
+                                        setmRecyclerView(homeworkList);
+                                        SuperActivityToast superActivityToast = new SuperActivityToast(ViewHomeworkActivity.this, SuperToast.Type.BUTTON);
+                                        superActivityToast.setDuration(SuperToast.Duration.EXTRA_LONG);
+                                        superActivityToast.setText("Homework Unarchived");
+                                        superActivityToast.setButtonIcon(SuperToast.Icon.Dark.UNDO, "UNDO");
+                                        OnClickWrapper onClickWrapper = new OnClickWrapper("superactivitytoast", new SuperToast.OnClickListener() {
+                                            @Override
+                                            public void onClick(View view, Parcelable token) {
+                                                homework.setmArchived(1);
+                                                homework.save();
+                                                List<Homework> homeworkList = getHomeworkList(pickString);
+                                                setmRecyclerView(homeworkList);
+                                            }
+
+                                        });
+                                        superActivityToast.setOnClickWrapper(onClickWrapper);
+                                        superActivityToast.show();
+                                    }
+
+                                }
+
+
+                            }
+                        });
+        mRecyclerView.addOnItemTouchListener(swipeTouchListener);
     }
 }

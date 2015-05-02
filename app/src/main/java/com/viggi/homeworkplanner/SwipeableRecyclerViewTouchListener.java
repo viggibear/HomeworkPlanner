@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package com.example.gpacalculator;
+package com.viggi.homeworkplanner;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
