@@ -168,6 +168,10 @@ public class HomeworkActivity extends ActionBarActivity implements DatePickerDia
                         errorToast(getString(R.string.faulty_reminder_chronlogy));
                         return;
                     }
+                    if(!reminderDateTime.isAfter(new LocalDateTime())){
+                        errorToast(getString(R.string.reminder_before_now));
+                        return;
+                    }
                 }
 
                 homework.setHwName(mAssignmentNameString);
@@ -179,7 +183,7 @@ public class HomeworkActivity extends ActionBarActivity implements DatePickerDia
                 if (mChecked){
                     homework.setmDone(1);
                 }
-                else if (mChecked){
+                else if (!mChecked){
                     homework.setmDone(0);
                 }
 

@@ -45,6 +45,8 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
     EditText mReminderDate;
     EditText mReminderTime;
 
+    List<Homework> homeworkList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,6 +93,7 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
         });
 
         FloatingActionButton mConfirmButton = (FloatingActionButton) findViewById(R.id.add_confirm_fab);
+        homeworkList = Homework.listAll(Homework.class);
         mConfirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -103,6 +106,7 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
 
                 if (mAssignmentNameString.isEmpty()) {
                     mAssignmentName.setError(getString(R.string.empty_error_string));
+                    return;
                 }
 
                 if (mSubjectNameString.isEmpty()) {
@@ -120,11 +124,9 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
                     return;
                 }
 
-                for(Homework homeworkObject:Homework.listAll(Homework.class)){
-                    if (homeworkObject.getSubjName().equals(mSubjectNameString) && homeworkObject.getHwName().equals(mAssignmentNameString)){
-                        errorToast(getString(R.string.homework_exists_string));
-                        break;
-                    }
+                homeworkList = Homework.findWithQuery(Homework.class, "Select * from homework where hw_name = ? and subj_name =?", mAssignmentNameString, mSubjectNameString);
+                if (homeworkList.size()>0){
+                    errorToast(getString(R.string.homework_exists_string));
                     return;
                 }
 
@@ -139,6 +141,10 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
                         errorToast(getString(R.string.faulty_reminder_chronlogy));
                         return;
                     }
+                    if(!reminderDateTime.isAfter(new LocalDateTime())){
+                        errorToast(getString(R.string.reminder_before_now));
+                        return;
+                    }
                 }
 
                 Homework homework = new Homework(mAssignmentNameString, mSubjectNameString, mNotesString, dueDate.toDate(), reminderDateTime.toDate(), 0, 0);
@@ -148,7 +154,8 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
                 Intent alarmIntent = new Intent(AddHomeworkActivity.this, AlarmReceiver.class);
                 alarmIntent.putExtra("HOMEWORK_NAME", homework.getHwName());
                 alarmIntent.putExtra("DUE_DATE_STRING", mDueDateString);
-                List<Homework> homeworkList = Homework.listAll(Homework.class);
+
+                homeworkList = Homework.listAll(Homework.class);
                 for (int i = 0; i < homeworkList.size(); i++){
                     Homework homeworkObject = homeworkList.get(i);
                     if (homeworkObject.getSubjName().equals(homework.getSubjName()) && homeworkObject.getHwName().equals(homework.getHwName())){

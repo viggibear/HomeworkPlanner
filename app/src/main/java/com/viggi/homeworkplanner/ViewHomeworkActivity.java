@@ -14,12 +14,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 
 import com.github.johnpersano.supertoasts.SuperActivityToast;
 import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.OnClickWrapper;
 import com.melnykov.fab.FloatingActionButton;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -81,7 +84,6 @@ public class ViewHomeworkActivity extends ActionBarActivity
         } else if (position == 2) {
             pickString = "Archived";
             setTitle("Archived");
-
         }
         try {
             List<Homework> homeworkList = getHomeworkList(pickString);
@@ -126,6 +128,69 @@ public class ViewHomeworkActivity extends ActionBarActivity
         if (id == R.id.action_settings) {
             return true;
         }
+        else if (id == R.id.action_sort){
+            AlertDialog.Builder builderSingle = new AlertDialog.Builder(
+                    ViewHomeworkActivity.this);
+            builderSingle.setIcon(R.drawable.ic_homework);
+            builderSingle.setTitle("Select One Name:-");
+            final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(
+                    ViewHomeworkActivity.this,
+                    android.R.layout.select_dialog_singlechoice);
+            arrayAdapter.add("A-Z");
+            arrayAdapter.add("Subject");
+            arrayAdapter.add("By Due Date");
+            builderSingle.setNegativeButton("cancel",
+                    new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    });
+
+            builderSingle.setAdapter(arrayAdapter,
+                    new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String strName = arrayAdapter.getItem(which);
+                            if (strName.equals("A-Z")) {
+                                List<Homework> homeworkList = getHomeworkList(pickString);
+                                Collections.sort(homeworkList, new Comparator<Homework>() {
+                                    public int compare(Homework v1, Homework v2) {
+                                        if(v1.getHwName() == v2.getHwName())
+                                            return 0;
+                                        return v1.getHwName().compareTo(v2.getHwName());
+                                    }
+                                });
+                                setmRecyclerView(homeworkList);
+                            }
+                            else if (strName.equals("Subject")) {
+                                List<Homework> homeworkList = getHomeworkList(pickString);
+                                Collections.sort(homeworkList, new Comparator<Homework>() {
+                                    public int compare(Homework v1, Homework v2) {
+                                        if(v1.getSubjName() == v2.getSubjName())
+                                            return 0;
+                                        return v1.getSubjName().compareTo(v2.getSubjName());
+                                    }
+                                });
+                                setmRecyclerView(homeworkList);
+                            }
+                            else if (strName.equals("By Due Date")) {
+                                List<Homework> homeworkList = getHomeworkList(pickString);
+                                Collections.sort(homeworkList, new Comparator<Homework>() {
+                                    public int compare(Homework v1, Homework v2) {
+                                        if(v1.getDueDate() == v2.getDueDate())
+                                            return 0;
+                                        return v1.getDueDate().compareTo(v2.getDueDate());
+                                    }
+                                });
+                                setmRecyclerView(homeworkList);
+                            }
+                        }
+                    });
+            builderSingle.show();
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -165,7 +230,16 @@ public class ViewHomeworkActivity extends ActionBarActivity
                     @Override
                     public void onItemClick(View view, int position) {
                         Intent intent = new Intent(ViewHomeworkActivity.this, HomeworkActivity.class);
-                        intent.putExtra("HOMEWORK_INDEX", position);
+
+                        List<Homework> homeworkList = getHomeworkList(pickString);
+                        Homework homework = homeworkList.get(position);
+                        for (int i = 0; i < homeworkList.size(); i++){
+                            Homework homeworkObject = homeworkList.get(i);
+                            if (homeworkObject.getSubjName().equals(homework.getSubjName()) && homeworkObject.getHwName().equals(homework.getHwName())){
+                                intent.putExtra("HOMEWORK_INDEX", i);
+                            }
+                        }
+
                         startActivity(intent);
                     }
                 }
