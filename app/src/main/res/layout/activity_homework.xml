@@ -77,7 +77,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="Date"
-            app:met_iconLeft="@drawable/ic_edit_black_18dp"
+            app:met_iconLeft="@drawable/ic_access_alarm_black_18dp"
             app:met_iconPadding="0dp"
             android:layout_below="@+id/add_duedate_edittext"
             android:layout_alignParentStart="true"

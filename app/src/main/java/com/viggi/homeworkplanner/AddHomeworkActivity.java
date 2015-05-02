@@ -1,8 +1,12 @@
 package com.viggi.homeworkplanner;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +25,7 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 
 import java.util.Calendar;
+import java.util.List;
 
 
 public class AddHomeworkActivity extends ActionBarActivity implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
@@ -40,19 +45,22 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
     EditText mDueDate;
     EditText mReminderDate;
     EditText mReminderTime;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_homework);
 
-        mAssignmentName = (MaterialEditText)findViewById(R.id.add_assmname_edittext);
-        mSubjectName = (MaterialEditText)findViewById(R.id.add_subjname_edittext);
-        mNotes = (MaterialEditText)findViewById(R.id.add_notes_edittext);
-        mDueDate = (EditText)findViewById(R.id.add_duedate_edittext);
-        mReminderDate = (EditText)findViewById(R.id.add_reminderdate_edittext);
-        mReminderTime = (EditText)findViewById(R.id.add_remindertime_edittext);
+        mAssignmentName = (MaterialEditText) findViewById(R.id.add_assmname_edittext);
+        mSubjectName = (MaterialEditText) findViewById(R.id.add_subjname_edittext);
+        mNotes = (MaterialEditText) findViewById(R.id.add_notes_edittext);
+        mDueDate = (EditText) findViewById(R.id.add_duedate_edittext);
+        mReminderDate = (EditText) findViewById(R.id.add_reminderdate_edittext);
+        mReminderTime = (EditText) findViewById(R.id.add_remindertime_edittext);
 
-        mDueDate.setFocusable(false); mReminderDate.setFocusable(false); mReminderTime.setFocusable(false);
+        mDueDate.setFocusable(false);
+        mReminderDate.setFocusable(false);
+        mReminderTime.setFocusable(false);
 
         mDueDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,7 +91,7 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
             }
         });
 
-        FloatingActionButton mConfirmButton = (FloatingActionButton)findViewById(R.id.add_confirm_fab);
+        FloatingActionButton mConfirmButton = (FloatingActionButton) findViewById(R.id.add_confirm_fab);
         mConfirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -108,8 +116,15 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
                     return;
                 }
 
-                if ((mReminderDateString.isEmpty() && !mReminderTimeString.isEmpty()) || (!mReminderDateString.isEmpty() && mReminderTimeString.isEmpty())){
+                if ((mReminderDateString.isEmpty() && !mReminderTimeString.isEmpty()) || (!mReminderDateString.isEmpty() && mReminderTimeString.isEmpty())) {
                     errorToast(getString(R.string.incomplete_reminder_fields));
+                    return;
+                }
+
+                for(Homework homeworkObject:Homework.listAll(Homework.class)){
+                    if (homeworkObject.getSubjName().equals(mSubjectNameString) && homeworkObject.getHwName().equals(mAssignmentNameString)){
+                        errorToast(getString(R.string.homework_exists_string));
+                    }
                     return;
                 }
 
@@ -118,9 +133,9 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
                 final LocalDate dueDate = LocalDate.parse(mDueDateString, DateTimeFormat.forPattern(datePattern));
                 LocalDateTime reminderDateTime = new LocalDateTime(1986, 4, 8, 12, 30);
 
-                if (!mReminderDateString.isEmpty() && !mReminderTimeString.isEmpty()){
-                    reminderDateTime = LocalDateTime.parse(mReminderDateString+" "+mReminderTimeString, DateTimeFormat.forPattern(dateTimePattern));
-                    if (reminderDateTime.isAfter(LocalDateTime.parse(mDueDateString + " 00:00", DateTimeFormat.forPattern(dateTimePattern)))){
+                if (!mReminderDateString.isEmpty() && !mReminderTimeString.isEmpty()) {
+                    reminderDateTime = LocalDateTime.parse(mReminderDateString + " " + mReminderTimeString, DateTimeFormat.forPattern(dateTimePattern));
+                    if (reminderDateTime.isAfter(LocalDateTime.parse(mDueDateString + " 00:00", DateTimeFormat.forPattern(dateTimePattern)))) {
                         errorToast(getString(R.string.faulty_reminder_chronlogy));
                         return;
                     }
@@ -128,6 +143,25 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
 
                 Homework homework = new Homework(mAssignmentNameString, mSubjectNameString, mNotesString, dueDate.toDate(), reminderDateTime.toDate(), 0, 0);
                 homework.save();
+
+                AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                Intent alarmIntent = new Intent(AddHomeworkActivity.this, AlarmReceiver.class);
+                alarmIntent.putExtra("HOMEWORK_NAME", homework.getHwName());
+                alarmIntent.putExtra("DUE_DATE_STRING", mDueDateString);
+                List<Homework> homeworkList = Homework.listAll(Homework.class);
+                for (int i = 0; i < homeworkList.size(); i++){
+                    Homework homeworkObject = homeworkList.get(i);
+                    if (homeworkObject.getSubjName().equals(homework.getSubjName()) && homeworkObject.getHwName().equals(homework.getHwName())){
+                        alarmIntent.putExtra("HOMEWORK_INDEX", i);
+                        Log.d("index", String.valueOf(i));
+                    }
+                }
+
+
+                Calendar reminderCalendarDate = Calendar.getInstance();
+                reminderCalendarDate.setTime(reminderDateTime.toDate());
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(AddHomeworkActivity.this, 0, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                alarmMgr.set(AlarmManager.RTC_WAKEUP, reminderCalendarDate.getTimeInMillis(), pendingIntent);
 
                 Intent intent = new Intent(AddHomeworkActivity.this, ViewHomeworkActivity.class);
                 startActivity(intent);
@@ -168,23 +202,23 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
 
     @Override
     public void onDateSet(DatePickerDialog datePickerDialog, int year, int month, int day) {
-        if(datePickerDialog.getTag().equals(DUE_DATEPICKER_TAG)) {
-            String dueDateString = String.format("%02d", day)+"-"+String.format("%02d", month + 1)+"-"+String.valueOf(year);
+        if (datePickerDialog.getTag().equals(DUE_DATEPICKER_TAG)) {
+            String dueDateString = String.format("%02d", day) + "-" + String.format("%02d", month + 1) + "-" + String.valueOf(year);
             mDueDate.setText(dueDateString);
         }
-        if(datePickerDialog.getTag().equals(REMINDER_DATEPICKER_TAG)) {
-            String reminderDateString = String.format("%02d", day)+"-"+String.format("%02d", month+1)+"-"+String.valueOf(year);
+        if (datePickerDialog.getTag().equals(REMINDER_DATEPICKER_TAG)) {
+            String reminderDateString = String.format("%02d", day) + "-" + String.format("%02d", month + 1) + "-" + String.valueOf(year);
             mReminderDate.setText(reminderDateString);
         }
     }
 
     @Override
     public void onTimeSet(RadialPickerLayout view, int hourOfDay, int minute) {
-        String reminderTimeString = String.format("%02d", hourOfDay)+":"+String.format("%02d", minute);
+        String reminderTimeString = String.format("%02d", hourOfDay) + ":" + String.format("%02d", minute);
         mReminderTime.setText(reminderTimeString);
     }
 
-    public void errorToast(String errorText){
+    public void errorToast(String errorText) {
         SuperActivityToast superToast = new SuperActivityToast(AddHomeworkActivity.this);
         superToast.setDuration(SuperToast.Duration.SHORT);
         superToast.setText(errorText);
