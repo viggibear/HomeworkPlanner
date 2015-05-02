@@ -3,6 +3,7 @@ package com.viggi.homeworkplanner;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Parcelable;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,7 +56,6 @@ public class HomeworkViewAdapter extends RecyclerView.Adapter<HomeworkViewAdapte
         viewHolder.mSubjectName.setText(homework.getSubjName());
         viewHolder.mDueDate.setText("Due: "+dueDateString);
         viewHolder.mCheckBox.setChecked(doneChecked);
-
 
         final boolean checked = doneChecked;
         final int position = i;
