@@ -164,7 +164,9 @@ public class ViewHomeworkActivity extends ActionBarActivity
                 new RecyclerItemSingleClickListener(this, new RecyclerItemSingleClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-
+                        Intent intent = new Intent(ViewHomeworkActivity.this, HomeworkActivity.class);
+                        intent.putExtra("HOMEWORK_INDEX", position);
+                        startActivity(intent);
                     }
                 }
         ));
