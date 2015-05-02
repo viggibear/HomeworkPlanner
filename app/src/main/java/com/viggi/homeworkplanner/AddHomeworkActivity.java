@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -124,6 +123,7 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
                 for(Homework homeworkObject:Homework.listAll(Homework.class)){
                     if (homeworkObject.getSubjName().equals(mSubjectNameString) && homeworkObject.getHwName().equals(mAssignmentNameString)){
                         errorToast(getString(R.string.homework_exists_string));
+                        break;
                     }
                     return;
                 }
@@ -131,8 +131,8 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
                 final String datePattern = "dd-MM-yy";
                 final String dateTimePattern = "dd-MM-yy HH:mm";
                 final LocalDate dueDate = LocalDate.parse(mDueDateString, DateTimeFormat.forPattern(datePattern));
-                LocalDateTime reminderDateTime = new LocalDateTime(1986, 4, 8, 12, 30);
 
+                LocalDateTime reminderDateTime = new LocalDateTime();
                 if (!mReminderDateString.isEmpty() && !mReminderTimeString.isEmpty()) {
                     reminderDateTime = LocalDateTime.parse(mReminderDateString + " " + mReminderTimeString, DateTimeFormat.forPattern(dateTimePattern));
                     if (reminderDateTime.isAfter(LocalDateTime.parse(mDueDateString + " 00:00", DateTimeFormat.forPattern(dateTimePattern)))) {
@@ -153,11 +153,8 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
                     Homework homeworkObject = homeworkList.get(i);
                     if (homeworkObject.getSubjName().equals(homework.getSubjName()) && homeworkObject.getHwName().equals(homework.getHwName())){
                         alarmIntent.putExtra("HOMEWORK_INDEX", i);
-                        Log.d("index", String.valueOf(i));
                     }
                 }
-
-
                 Calendar reminderCalendarDate = Calendar.getInstance();
                 reminderCalendarDate.setTime(reminderDateTime.toDate());
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(AddHomeworkActivity.this, 0, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT);

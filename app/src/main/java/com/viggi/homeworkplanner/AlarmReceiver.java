@@ -18,20 +18,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         String mHomeworkName = intent.getStringExtra("HOMEWORK_NAME");
         String mDueDateString = intent.getStringExtra("DUE_DATE_STRING");
-
-        Intent oneHourRemindIntent = new Intent(context, PingService.class);
-        oneHourRemindIntent.setAction(CommonConstants.ACTION_REMIND_ONE_HOUR);
-        oneHourRemindIntent.putExtra("HOMEWORK_NAME", mHomeworkName);
-        oneHourRemindIntent.putExtra("DUE_DATE_STRING", mDueDateString);
-        oneHourRemindIntent.putExtra("HOMEWORK_INDEX",intent.getIntExtra("HOMEWORK_INDEX", 0));
-        PendingIntent piRemind = PendingIntent.getService(context, 0, oneHourRemindIntent, 0);
-
-        Intent doneIntent = new Intent(context, PingService.class);
-        doneIntent.setAction(CommonConstants.ACTION_DONE);
-        doneIntent.putExtra("HOMEWORK_NAME", mHomeworkName);
-        doneIntent.putExtra("DUE_DATE_STRING", mDueDateString);
-        doneIntent.putExtra("HOMEWORK_INDEX",intent.getIntExtra("HOMEWORK_INDEX", 0));
-        PendingIntent piDone = PendingIntent.getService(context, 0, doneIntent, 0);
+        final int homeworkIndex = intent.getIntExtra("HOMEWORK_INDEX", 0);
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
@@ -40,13 +27,11 @@ public class AlarmReceiver extends BroadcastReceiver {
                         .setContentText("Due: " + mDueDateString)
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(mHomeworkName + " is Due on " + mDueDateString))
-                        .addAction(R.drawable.ic_access_alarm_black_18dp, "Snooze", piRemind)
-                        .addAction (R.drawable.ic_done_black_18dp, "Done", piDone);
+                        .setAutoCancel(true);
+
 
         Intent resultIntent = new Intent(context, HomeworkActivity.class);
-        resultIntent.putExtra("HOMEWORK_INDEX",intent.getIntExtra("HOMEWORK_INDEX", 0));
-        // Because clicking the notification opens a new ("special") activity, there's
-        // no need to create an artificial back stack.
+        resultIntent.putExtra("HOMEWORK_INDEX", homeworkIndex);
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(
                         context,
@@ -54,12 +39,13 @@ public class AlarmReceiver extends BroadcastReceiver {
                         resultIntent,
                         PendingIntent.FLAG_CANCEL_CURRENT);
         mBuilder.setContentIntent(resultPendingIntent);
-        mBuilder.setAutoCancel(true);
-        // Sets an ID for the notification
         int mNotificationId = 001;
-        // Gets an instance of the NotificationManager service
-        NotificationManager mNotifyMgr = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        // Builds the notification and issues it.
-        mNotifyMgr.notify(mNotificationId, mBuilder.build());
+        Homework homeworkObject = Homework.listAll(Homework.class).get(homeworkIndex);
+
+        if (homeworkObject.getmArchived() == 0){
+            NotificationManager mNotifyMgr = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotifyMgr.notify(mNotificationId, mBuilder.build());
+        }
+
     }
 }

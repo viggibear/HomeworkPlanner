@@ -2,7 +2,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.viggi.homeworkplanner.HomeworkActivity">
-    <item android:id="@+id/action_export" android:title="@string/action_export"/>
+    <item android:id="@+id/action_export" android:title="@string/action_export"
+        android:icon="@drawable/ic_import_export_white_18dp" app:showAsAction="always"/>
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
 </menu>
