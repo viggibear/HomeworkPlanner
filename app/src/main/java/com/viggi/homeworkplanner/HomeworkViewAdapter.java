@@ -45,6 +45,7 @@ public class HomeworkViewAdapter extends RecyclerView.Adapter<HomeworkViewAdapte
         LocalDate jodadueDate = new LocalDate(homework.getDueDate());
         LocalDate currentDate = new LocalDate();
         String dueDateString = DateTimeFormat.forPattern("dd MMM yy").print(jodadueDate);
+        final int daysTo = Days.daysBetween(currentDate, jodadueDate).getDays();
 
         boolean doneChecked = false;
         switch (homework.getmDone()) {
@@ -54,12 +55,13 @@ public class HomeworkViewAdapter extends RecyclerView.Adapter<HomeworkViewAdapte
                     break;
         }
 
+        if(daysTo<0){
+            viewHolder.mHomeworkName.setText(homework.getHwName()+" (Overdue)");
+        }
         viewHolder.mHomeworkName.setText(homework.getHwName());
         viewHolder.mSubjectName.setText(homework.getSubjName());
         viewHolder.mDueDate.setText("Due: "+dueDateString);
         viewHolder.mCheckBox.setChecked(doneChecked);
-
-        final int daysTo = Days.daysBetween(currentDate, jodadueDate).getDays();
 
         if (daysTo<=1){
             viewHolder.mLabel.setColor(context.getResources().getColor(R.color.overdue));
