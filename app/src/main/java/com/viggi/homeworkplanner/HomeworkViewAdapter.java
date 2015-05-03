@@ -2,8 +2,8 @@ package com.viggi.homeworkplanner;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Parcelable;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +15,7 @@ import com.github.johnpersano.supertoasts.SuperActivityToast;
 import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.OnClickWrapper;
 
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 
@@ -42,6 +43,7 @@ public class HomeworkViewAdapter extends RecyclerView.Adapter<HomeworkViewAdapte
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
         final Homework homework = homeworkList.get(i);
         LocalDate jodadueDate = new LocalDate(homework.getDueDate());
+        LocalDate currentDate = new LocalDate();
         String dueDateString = DateTimeFormat.forPattern("dd MMM yy").print(jodadueDate);
 
         boolean doneChecked = false;
@@ -57,7 +59,18 @@ public class HomeworkViewAdapter extends RecyclerView.Adapter<HomeworkViewAdapte
         viewHolder.mDueDate.setText("Due: "+dueDateString);
         viewHolder.mCheckBox.setChecked(doneChecked);
 
-        final boolean checked = doneChecked;
+        final int daysTo = Days.daysBetween(currentDate, jodadueDate).getDays();
+
+        if (daysTo<=1){
+            viewHolder.mLabel.setColor(context.getResources().getColor(R.color.overdue));
+        }
+        else if (daysTo>1 && daysTo<=3){
+            viewHolder.mLabel.setColor(context.getResources().getColor(R.color.intermediate));
+        }
+        else if (daysTo>3){
+            viewHolder.mLabel.setColor(context.getResources().getColor(R.color.clear));
+        }
+
         final int position = i;
         viewHolder.mCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -132,6 +145,7 @@ public class HomeworkViewAdapter extends RecyclerView.Adapter<HomeworkViewAdapte
         public TextView mSubjectName;
         public TextView mDueDate;
         public CheckBox mCheckBox;
+        public GradientDrawable mLabel;
 
         public ViewHolder(View v) {
             super(v);
@@ -139,6 +153,7 @@ public class HomeworkViewAdapter extends RecyclerView.Adapter<HomeworkViewAdapte
             mSubjectName = (TextView) v.findViewById(R.id.cardview_subjectname_textview);
             mDueDate = (TextView) v.findViewById(R.id.cardview_duedate_textview);
             mCheckBox = (CheckBox) v.findViewById(R.id.cardview_done_checkbox);
+            mLabel = (GradientDrawable)v.findViewById(R.id.hw_label).getBackground();
         }
     }
 }

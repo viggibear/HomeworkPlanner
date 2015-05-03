@@ -7,6 +7,12 @@
     card_view:cardCornerRadius="4dp"
     card_view:cardUseCompatPadding="true">
 
+    <ImageView
+        android:id="@+id/hw_label"
+        android:background="@drawable/card_label"
+        android:layout_height="wrap_content"
+        android:layout_width="8dp" />
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="116dp"
