@@ -21,6 +21,7 @@ import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.OnClickWrapper;
 import com.melnykov.fab.FloatingActionButton;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -66,8 +67,7 @@ public class ViewHomeworkActivity extends ActionBarActivity
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        List<Homework> homeworkList = getHomeworkList(pickString);
-        setmRecyclerView(homeworkList);
+        onNavigationDrawerItemSelected(0);
         setListeners(mRecyclerView);
 
     }
@@ -89,7 +89,7 @@ public class ViewHomeworkActivity extends ActionBarActivity
             List<Homework> homeworkList = getHomeworkList(pickString);
             setmRecyclerView(homeworkList);
         } catch (NullPointerException e) {
-            return;
+            List<Homework> homeworkList = getHomeworkList(pickString);
         }
 
     }
@@ -201,27 +201,28 @@ public class ViewHomeworkActivity extends ActionBarActivity
     }
 
     public List<Homework> getHomeworkList(String pickString) {
-        List<Homework> homeworkList = Homework.listAll(Homework.class);
+        List<Homework> returnHomeworkList = Homework.listAll(Homework.class);
+        //Iterator<Homework> homeworkIterator = returnHomeworkList.iterator();
         if (pickString.equals("Due")) {
-            for (Homework homework : homeworkList) {
-                if (homework.getmDone() == 1 || homework.getmArchived() == 1) {
-                    homeworkList.remove(homework);
+            for (Homework homeworkObject : new ArrayList<>(returnHomeworkList)) {
+                if (homeworkObject.getmDone() == 1 || homeworkObject.getmArchived() == 1) {
+                    returnHomeworkList.remove(homeworkObject);
                 }
             }
         } else if (pickString.equals("Done")) {
-            for (Homework homework : homeworkList) {
-                if (homework.getmDone() == 0 || homework.getmArchived() == 1) {
-                    homeworkList.remove(homework);
+            for (Homework homeworkObject : new ArrayList<>(returnHomeworkList)) {
+                if (homeworkObject.getmDone() == 0 || homeworkObject.getmArchived() == 1) {
+                    returnHomeworkList.remove(homeworkObject);
                 }
             }
         } else if (pickString.equals("Archived")) {
-            for (Homework homework : homeworkList) {
-                if (homework.getmArchived() == 0) {
-                    homeworkList.remove(homework);
+            for (Homework homeworkObject : new ArrayList<>(returnHomeworkList)) {
+                if (homeworkObject.getmArchived() == 0) {
+                    returnHomeworkList.remove(homeworkObject);
                 }
             }
         }
-        return homeworkList;
+        return returnHomeworkList;
     }
 
     public void setListeners(RecyclerView mRecyclerView) {

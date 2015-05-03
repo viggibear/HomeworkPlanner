@@ -14,16 +14,18 @@
     <string name="empty_due_date">Fill in a Due Date</string>
     <string name="incomplete_reminder_fields">Complete Reminder Fields</string>
     <string name="faulty_reminder_chronlogy">Reminder Date has to be before Due Date</string>
+    <string name="homework_exists_string">Homework with same name and subject exists!</string>
     <string name="reminder_before_now">Reminder Date is before Now</string>
     <string name="title_activity_done_homework">DoneHomeworkActivity</string>
     <string name="title_activity_homework">HomeworkActivity</string>
-    <string name="one_hour_remind">Remind me in 1 hour</string>
-    <string name="done">Mark as Done</string>
-    <string name="homework_exists_string">Homework with same name and subject exists!</string>
+
+    <string name="one_hour_remind">Postpone 1 Hour</string>
+    <string name="done">Done</string>
 
     <string name="assignment_name">Assignment Name</string>
     <string name="subject_name">Subject Name</string>
     <string name="notes_string">Notes</string>
     <string name="date_string">Date</string>
     <string name="time_string">Time</string>
+    <string name="title_activity_notification_button_handler">NotificationButtonHandler</string>
 </resources>

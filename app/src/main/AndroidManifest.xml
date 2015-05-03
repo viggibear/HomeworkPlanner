@@ -22,7 +22,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="com.viggi.homeworkplanner.AlarmReceiver" />
+        <receiver android:name=".AlarmReceiver" />
 
         <meta-data
             android:name="DATABASE"
@@ -44,6 +44,10 @@
         <activity
             android:name=".HomeworkActivity"
             android:label="@string/title_activity_homework" >
+        </activity>
+        <activity
+            android:name=".NotificationButtonHandler"
+            android:label="@string/title_activity_notification_button_handler" >
         </activity>
     </application>
 
