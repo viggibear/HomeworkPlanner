@@ -11,3 +11,5 @@ Homework 3 Extensions
 8. Deletable Assignments
 9. Archivable Assignments
 10. Uses Material Date and Time pickers
+11. Label changes colour based on days left to assignment
+12. Notification has button to postpone reminder by 1 hour
