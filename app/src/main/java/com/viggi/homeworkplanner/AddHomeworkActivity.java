@@ -119,6 +119,11 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
                     return;
                 }
 
+                if(mReminderDateString.isEmpty() || mReminderTimeString.isEmpty()){
+                    errorToast(getString(R.string.incomplete_reminder_fields));
+                    return;
+                }
+
                 if ((mReminderDateString.isEmpty() && !mReminderTimeString.isEmpty()) || (!mReminderDateString.isEmpty() && mReminderTimeString.isEmpty())) {
                     errorToast(getString(R.string.incomplete_reminder_fields));
                     return;
@@ -149,6 +154,7 @@ public class AddHomeworkActivity extends ActionBarActivity implements DatePicker
 
                 Homework homework = new Homework(mAssignmentNameString, mSubjectNameString, mNotesString, dueDate.toDate(), reminderDateTime.toDate(), 0, 0);
                 homework.save();
+
 
                 AlarmManager alarmMgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
                 Intent alarmIntent = new Intent(AddHomeworkActivity.this, AlarmReceiver.class);

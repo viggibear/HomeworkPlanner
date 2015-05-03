@@ -152,6 +152,11 @@ public class HomeworkActivity extends ActionBarActivity implements DatePickerDia
                     return;
                 }
 
+                if(mReminderDateString.isEmpty() || mReminderTimeString.isEmpty()){
+                    errorToast(getString(R.string.incomplete_reminder_fields));
+                    return;
+                }
+
                 if ((mReminderDateString.isEmpty() && !mReminderTimeString.isEmpty()) || (!mReminderDateString.isEmpty() && mReminderTimeString.isEmpty())) {
                     errorToast(getString(R.string.incomplete_reminder_fields));
                     return;
